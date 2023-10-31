@@ -7,5 +7,5 @@ export const PARITIES = {
   cn: 22,
   au: 20,
   de: 25,
-  ua: 30,
+  ua: 90,
 };

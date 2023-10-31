@@ -3,12 +3,10 @@ import type { GetStaticPaths, GetStaticProps } from 'next';
 import Image from 'next/image';
 import type { ParsedUrlQuery } from 'querystring';
 import { Layout } from '@vercel/examples-ui';
-
 import type { Country } from '../types';
 import shirt from '../public/shirt.png';
 import map from '../public/map.svg';
-import api from '../api';
-import { fetchDiscountData } from '../utils';
+import api, { fetchDiscountData, handleCheckout } from '../api';
 
 interface Params extends ParsedUrlQuery {
   country: Country;
@@ -51,12 +49,13 @@ export const getStaticProps: GetStaticProps<unknown, Params> = async ({ params }
 };
 
 export default function CountryPage({ country, parity, parityPrice, PRODUCT_PRICE }) {
-  const [isParityEnabled, toggleParity] = useState<boolean>(false);
+  const [isParityEnabled, toggleParity] = useState(false);
+  const [isPaymentProcess, setIsPaymentProcess] = useState(false);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen py-10 bg-gray-50">
       <div className="fixed inset-0 overflow-hidden opacity-75 bg-[#f8fafb]">
-        <Image alt="World Map" src={map} layout="fill" objectFit="cover" quality={100} />
+        <Image alt="World Map" src={map} fill objectFit="cover" quality={100} />
       </div>
       <main className="flex flex-col items-center flex-1 px-4 sm:px-20 text-center z-10 sm:pt-10">
         <h1 className="text-3xl sm:text-5xl font-bold">Power parity pricing</h1>
@@ -136,8 +135,18 @@ export default function CountryPage({ country, parity, parityPrice, PRODUCT_PRIC
               </label>
             </div>
             <button
-              className="py-4 px-6 text-lg w-full bg-black text-white rounded-md hover:bg-gray-900"
-              onClick={() => alert(`its yours for USD ${isParityEnabled ? parityPrice : 500}`)}>
+              className={`py-4 px-6 text-lg w-full bg-black text-white rounded-md hover:bg-gray-900 ${
+                isPaymentProcess ? 'cursor-not-allowed' : ''
+              }`}
+              onClick={() => {
+                setIsPaymentProcess(true);
+                handleCheckout(
+                  'Alpha Black shirt',
+                  isParityEnabled ? parityPrice : 500,
+                  'https://i.ibb.co/WnbDs6t/image.png',
+                );
+              }}
+              disabled={isPaymentProcess}>
               Buy now
             </button>
           </div>

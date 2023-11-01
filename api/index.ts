@@ -1,5 +1,5 @@
 import { PARITIES } from '../helpers/constants';
-import { TCountry } from '../types/Tcountry';
+import { TCountry } from '../types/TCountry';
 
 export default {
   parity: {

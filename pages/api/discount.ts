@@ -1,17 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getParityPrice } from '../../helpers';
 import { PRODUCT_PRICE, PARITIES } from '../../helpers/constants';
-type ResponseData =
-  | {
-      parityPrice: string;
-      parity: number;
-      PRODUCT_PRICE: number;
-    }
-  | {
-      error: string;
-    };
+import { TDiscountData } from '../../types/TDiscountData';
 
-export default function handler(req: NextApiRequest, res: NextApiResponse<ResponseData>) {
+export default function handler(req: NextApiRequest, res: NextApiResponse<TDiscountData>) {
   if (req.method === 'POST') {
     const { country } = req.body;
     if (country) {

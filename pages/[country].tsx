@@ -3,10 +3,10 @@ import type { GetStaticPaths, GetStaticProps } from 'next';
 import Image from 'next/image';
 import type { ParsedUrlQuery } from 'querystring';
 import { Layout } from '@vercel/examples-ui';
-import type { TCountry } from '../types/Tcountry';
+import { TCountry } from '../types/TCountry';
 import shirt from '../public/shirt.png';
 import map from '../public/map.svg';
-import api from '../api/api';
+import api from '../api';
 import { fetchDiscountData } from '../api/fetchDiscountData';
 import { handleCheckout } from '../api/handleCheckout';
 import ArrowLeftIcon from '../public/icons/ArrowLeftIcon';
@@ -16,7 +16,6 @@ interface Params extends ParsedUrlQuery {
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  // Get the list of countries
   const countries = await api.parity.list();
 
   return {

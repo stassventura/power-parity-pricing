@@ -7,7 +7,7 @@ export const config = {
 
 export function middleware(req: NextRequest) {
   // Get country
-  const country = req.geo.country?.toLowerCase() || 'cn';
+  const country = req.geo.country?.toLowerCase() || 'ua';
 
   // Update pathname
   req.nextUrl.pathname = `/${country}`;

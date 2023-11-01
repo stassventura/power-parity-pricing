@@ -3,19 +3,19 @@ import type { GetStaticPaths, GetStaticProps } from 'next';
 import Image from 'next/image';
 import type { ParsedUrlQuery } from 'querystring';
 import { Layout } from '@vercel/examples-ui';
-
-import type { Country } from '../types';
+import { TCountry } from '../types/TCountry';
 import shirt from '../public/shirt.png';
 import map from '../public/map.svg';
 import api from '../api';
-import { fetchDiscountData } from '../utils';
+import { fetchDiscountData } from '../api/fetchDiscountData';
+import { handleCheckout } from '../api/handleCheckout';
+import ArrowLeftIcon from '../public/icons/ArrowLeftIcon';
 
 interface Params extends ParsedUrlQuery {
-  country: Country;
+  country: TCountry;
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  // Get the list of countries
   const countries = await api.parity.list();
 
   return {
@@ -51,12 +51,13 @@ export const getStaticProps: GetStaticProps<unknown, Params> = async ({ params }
 };
 
 export default function CountryPage({ country, parity, parityPrice, PRODUCT_PRICE }) {
-  const [isParityEnabled, toggleParity] = useState<boolean>(false);
+  const [isParityEnabled, toggleParity] = useState(false);
+  const [isPaymentProcess, setIsPaymentProcess] = useState(false);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen py-10 bg-gray-50">
       <div className="fixed inset-0 overflow-hidden opacity-75 bg-[#f8fafb]">
-        <Image alt="World Map" src={map} layout="fill" objectFit="cover" quality={100} />
+        <Image alt="World Map" src={map} fill objectFit="cover" quality={100} />
       </div>
       <main className="flex flex-col items-center flex-1 px-4 sm:px-20 text-center z-10 sm:pt-10">
         <h1 className="text-3xl sm:text-5xl font-bold">Power parity pricing</h1>
@@ -69,20 +70,7 @@ export default function CountryPage({ country, parity, parityPrice, PRODUCT_PRIC
           target="_blank"
           rel="noreferrer">
           View headers documentation
-          <svg
-            viewBox="0 0 24 24"
-            width="16"
-            height="16"
-            stroke="currentColor"
-            className="ml-1"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            fill="none"
-            shapeRendering="geometricPrecision">
-            <path d="M5 12h14" />
-            <path d="M12 5l7 7-7 7" />
-          </svg>
+          <ArrowLeftIcon />
         </a>
         <div className="lg:h-[512px] lg:w-[512px] h-[320px] w-[320px] -mb-40 lg:-mb-56">
           <Image
@@ -113,8 +101,7 @@ export default function CountryPage({ country, parity, parityPrice, PRODUCT_PRIC
             <div className="bg-gray-50 text-gray-500 text-left py-2 px-4 rounded-md border-gray-200 border text-sm flex flex-col gap-4">
               <p className="inline-block">
                 <span>We noticed that you&apos;re from </span>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
                   className="bg-gray-200 inline-flex"
                   width={16}
                   height={12}
@@ -136,8 +123,18 @@ export default function CountryPage({ country, parity, parityPrice, PRODUCT_PRIC
               </label>
             </div>
             <button
-              className="py-4 px-6 text-lg w-full bg-black text-white rounded-md hover:bg-gray-900"
-              onClick={() => alert(`its yours for USD ${isParityEnabled ? parityPrice : 500}`)}>
+              className={`py-4 px-6 text-lg w-full bg-black text-white rounded-md hover:bg-gray-900 ${
+                isPaymentProcess ? 'cursor-not-allowed' : ''
+              }`}
+              onClick={() => {
+                setIsPaymentProcess(true);
+                handleCheckout(
+                  'Alpha Black shirt',
+                  isParityEnabled ? parityPrice : 500,
+                  'https://i.ibb.co/WnbDs6t/image.png',
+                );
+              }}
+              disabled={isPaymentProcess}>
               Buy now
             </button>
           </div>

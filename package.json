@@ -10,10 +10,15 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@stripe/stripe-js": "^2.1.10",
     "@vercel/examples-ui": "^1.0.5",
+    "axios": "^1.6.0",
+    "micro": "^10.0.1",
     "next": "canary",
     "react": "latest",
-    "react-dom": "latest"
+    "react-dom": "latest",
+    "stripe": "^14.2.0",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@types/node": "^17.0.45",

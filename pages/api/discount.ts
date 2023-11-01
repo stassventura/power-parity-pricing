@@ -1,22 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { PRODUCT_PRICE, PARITIES } from '../../constants';
-type ResponseData =
-  | {
-      parityPrice: string;
-      parity: number;
-      PRODUCT_PRICE: number;
-    }
-  | {
-      error: string;
-    };
+import { getParityPrice } from '../../helpers';
+import { PRODUCT_PRICE, PARITIES } from '../../helpers/constants';
+import { TDiscountData } from '../../types/TDiscountData';
 
-function getParityPrice(price: number, parity: number): string {
-  return Number(Math.round(price - (parity * price) / 100)).toLocaleString('en-US', {
-    currency: 'USD',
-  });
-}
-
-export default function handler(req: NextApiRequest, res: NextApiResponse<ResponseData>) {
+export default function handler(req: NextApiRequest, res: NextApiResponse<TDiscountData>) {
   if (req.method === 'POST') {
     const { country } = req.body;
     if (country) {

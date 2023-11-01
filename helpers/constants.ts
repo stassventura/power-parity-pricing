@@ -9,3 +9,5 @@ export const PARITIES = {
   de: 25,
   ua: 90,
 };
+
+export const pathToFormData = '/data/index.json';

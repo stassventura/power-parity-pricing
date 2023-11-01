@@ -1,14 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import Map from '../../public/map.svg';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { TFormData } from '../../types/TFormData';
+import { sendFormData } from '../../api/sendFormData';
 
 const ErrorPage = () => {
+  const [message, setMessage] = useState<{ text: string; success: boolean } | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const {
     register,
     handleSubmit,
     formState: { errors },
+    reset,
   } = useForm<TFormData>({
     defaultValues: {
       firstName: '',
@@ -18,7 +23,23 @@ const ErrorPage = () => {
     },
   });
 
-  const onSubmit: SubmitHandler<TFormData> = (data) => console.log(data);
+  const onSubmit: SubmitHandler<TFormData> = async (data) => {
+    try {
+      const res = await sendFormData(data);
+      setMessage(res);
+      reset();
+    } catch (error) {
+      setMessage({
+        text: error.message,
+        success: false,
+      });
+    } finally {
+      setIsSubmitting(false);
+      setTimeout(() => {
+        setMessage(null);
+      }, 1500);
+    }
+  };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
@@ -50,9 +71,9 @@ const ErrorPage = () => {
                       maxLength: 30,
                     })}
                   />
-                  {errors.firstName?.type === 'required' && (
+                  {errors.firstName?.message && (
                     <p className="text-left text-[#F00] font-light text-xs">
-                      {errors.firstName?.message}
+                      {errors.firstName.message}
                     </p>
                   )}
                 </div>
@@ -68,9 +89,9 @@ const ErrorPage = () => {
                       maxLength: 30,
                     })}
                   />
-                  {errors.secondName?.type === 'required' && (
+                  {errors.secondName?.message && (
                     <p className="text-left text-[#F00] font-light text-xs">
-                      {errors.secondName?.message}
+                      {errors.secondName.message}
                     </p>
                   )}
                 </div>
@@ -106,18 +127,30 @@ const ErrorPage = () => {
                   className="h-10 w-full border-gray-200 border rounded-md mt-1 outline-none px-2 min-h-[96px]"
                   {...register('message', { required: 'Message is required', maxLength: 150 })}
                 />
-                {errors.message?.type === 'required' && (
+                {errors.message?.message && (
                   <p className="text-left text-[#F00] font-light text-xs">
-                    {errors.message?.message}
+                    {errors.message.message}
                   </p>
                 )}
               </div>
               <div className="gap-4 flex flex-col justify-center items-center border-b mt-5">
                 <button
                   type="submit"
-                  className="py-4 px-6 text-lg w-full bg-black text-white rounded-md hover:bg-gray-900">
+                  className={`py-4 px-6 text-lg w-full bg-black text-white rounded-md hover:bg-gray-900 ${
+                    isSubmitting ? 'cursor-not-allowed' : ''
+                  }`}
+                  disabled={isSubmitting}>
                   Send feedback
                 </button>
+
+                {message && (
+                  <p
+                    className={`text-sm relative -top-2 ${
+                      message.success ? 'text-emerald-600' : 'text-red-600'
+                    }`}>
+                    {message.text}
+                  </p>
+                )}
               </div>
             </form>
           </section>

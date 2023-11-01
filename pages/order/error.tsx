@@ -1,8 +1,10 @@
-import React, { ChangeEvent, FormEvent, useState, KeyboardEvent } from 'react';
+import React, { ChangeEvent, FormEvent, useState } from 'react';
 import Image from 'next/image';
 import map from '../../public/map.svg';
 
 const ErrorPage = () => {
+  const [isMoneyAmountError, setIsMoneyAmountError] = useState(false);
+
   const [formData, setFormData] = useState({
     firstName: '',
     secondName: '',
@@ -13,23 +15,25 @@ const ErrorPage = () => {
   const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = event.target;
 
+    if (id === 'moneyAmount' && isMoneyAmountError) {
+      setIsMoneyAmountError(false);
+    }
+
     setFormData((prevData) => ({
       ...prevData,
       [id]: value,
     }));
   };
 
-  const handleKeyPress = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (!/[0-9]/.test(event.key)) {
-      event.preventDefault();
-    }
-  };
-
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log(formData);
+    if (!/^\d*\.?\d*$/.test(formData.moneyAmount)) {
+      setIsMoneyAmountError(true);
+    } else {
+      console.log(formData);
+      alert('Thank u!');
+    }
   };
-
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
       <div>
@@ -80,17 +84,18 @@ const ErrorPage = () => {
                   Money amount
                 </label>
                 <input
-                  type="number"
+                  type="text"
                   className="h-10 w-full border-gray-200 border rounded-md my-1 outline-none px-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   id="moneyAmount"
                   value={formData.moneyAmount}
-                  onKeyPress={handleKeyPress}
                   onChange={handleChange}
                   required
                 />
-                <p className="text-left text-[#F00] font-light text-xs">
-                  Only numeric values are allowed
-                </p>
+                {isMoneyAmountError && (
+                  <p className="text-left text-[#F00] font-light text-xs">
+                    Only numeric values are allowed
+                  </p>
+                )}
               </div>
               <div className="flex flex-col text-black mt-5">
                 <label htmlFor="" className=" w-fit text-sm font-medium">

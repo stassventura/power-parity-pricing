@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { PRODUCT_PRICE, PARITIES } from '../../constants';
+import { getParityPrice } from '../../helpers';
+import { PRODUCT_PRICE, PARITIES } from '../../helpers/constants';
 type ResponseData =
   | {
       parityPrice: string;
@@ -9,12 +10,6 @@ type ResponseData =
   | {
       error: string;
     };
-
-function getParityPrice(price: number, parity: number): string {
-  return Number(Math.round(price - (parity * price) / 100)).toLocaleString('en-US', {
-    currency: 'USD',
-  });
-}
 
 export default function handler(req: NextApiRequest, res: NextApiResponse<ResponseData>) {
   if (req.method === 'POST') {

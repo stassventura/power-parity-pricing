@@ -3,13 +3,16 @@ import type { GetStaticPaths, GetStaticProps } from 'next';
 import Image from 'next/image';
 import type { ParsedUrlQuery } from 'querystring';
 import { Layout } from '@vercel/examples-ui';
-import type { Country } from '../types';
+import type { TCountry } from '../types/Tcountry';
 import shirt from '../public/shirt.png';
 import map from '../public/map.svg';
-import api, { fetchDiscountData, handleCheckout } from '../api';
+import api from '../api/api';
+import { fetchDiscountData } from '../api/fetchDiscountData';
+import { handleCheckout } from '../api/handleCheckout';
+import ArrowLeftIcon from '../public/icons/ArrowLeftIcon';
 
 interface Params extends ParsedUrlQuery {
-  country: Country;
+  country: TCountry;
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
@@ -68,20 +71,7 @@ export default function CountryPage({ country, parity, parityPrice, PRODUCT_PRIC
           target="_blank"
           rel="noreferrer">
           View headers documentation
-          <svg
-            viewBox="0 0 24 24"
-            width="16"
-            height="16"
-            stroke="currentColor"
-            className="ml-1"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            fill="none"
-            shapeRendering="geometricPrecision">
-            <path d="M5 12h14" />
-            <path d="M12 5l7 7-7 7" />
-          </svg>
+          <ArrowLeftIcon />
         </a>
         <div className="lg:h-[512px] lg:w-[512px] h-[320px] w-[320px] -mb-40 lg:-mb-56">
           <Image
@@ -112,8 +102,7 @@ export default function CountryPage({ country, parity, parityPrice, PRODUCT_PRIC
             <div className="bg-gray-50 text-gray-500 text-left py-2 px-4 rounded-md border-gray-200 border text-sm flex flex-col gap-4">
               <p className="inline-block">
                 <span>We noticed that you&apos;re from </span>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
                   className="bg-gray-200 inline-flex"
                   width={16}
                   height={12}

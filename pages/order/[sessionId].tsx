@@ -5,7 +5,8 @@ import axios from 'axios';
 import shirt from '../../public/shirt.png';
 import map from '../../public/map.svg';
 import Link from 'next/link';
-import { generateId } from '../../utils';
+import { generateId } from '../../helpers';
+
 type OrderPageProps = {
   email: string;
   id: number;

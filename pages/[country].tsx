@@ -6,7 +6,7 @@ import { Layout } from '@vercel/examples-ui';
 import { TCountry } from '../types/TCountry';
 import shirt from '../public/shirt.png';
 import map from '../public/map.svg';
-import api from '../api';
+import api from '../api/api';
 import { fetchDiscountData } from '../api/fetchDiscountData';
 import { handleCheckout } from '../api/handleCheckout';
 import ArrowLeftIcon from '../public/icons/ArrowLeftIcon';
@@ -31,7 +31,6 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const getStaticProps: GetStaticProps<unknown, Params> = async ({ params }) => {
   try {
     const { parity, parityPrice, PRODUCT_PRICE } = await fetchDiscountData(params.country);
-
     return {
       props: {
         country: params.country,

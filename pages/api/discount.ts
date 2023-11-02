@@ -14,5 +14,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse<TDisco
     } else {
       res.status(404);
     }
+  } else {
+    res.status(404);
   }
 }

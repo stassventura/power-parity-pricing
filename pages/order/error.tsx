@@ -1,44 +1,57 @@
-import React, { ChangeEvent, FormEvent, useState } from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
-import map from '../../public/map.svg';
+import Map from '../../public/map.svg';
+import { useForm, SubmitHandler, Controller } from 'react-hook-form';
+import { TPaymentFailedForm } from '../../types/TPaymentFailedForm';
+import { sendFormData } from '../../api/sendFormData';
+import { NumberInput } from '@mantine/core';
+import { useRouter } from 'next/navigation';
 
 const ErrorPage = () => {
-  const [isMoneyAmountError, setIsMoneyAmountError] = useState(false);
+  const [message, setMessage] = useState<{ text: string; success: boolean } | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
 
-  const [formData, setFormData] = useState({
-    firstName: '',
-    secondName: '',
-    moneyAmount: '',
-    message: '',
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    control,
+    reset,
+  } = useForm<TPaymentFailedForm>({
+    defaultValues: {
+      firstName: '',
+      secondName: '',
+      moneyAmount: '',
+      message: '',
+    },
+    mode: 'onSubmit',
   });
 
-  const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { id, value } = event.target;
-
-    if (id === 'moneyAmount' && isMoneyAmountError) {
-      setIsMoneyAmountError(false);
-    }
-
-    setFormData((prevData) => ({
-      ...prevData,
-      [id]: value,
-    }));
-  };
-
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!/^\d*\.?\d*$/.test(formData.moneyAmount)) {
-      setIsMoneyAmountError(true);
-    } else {
-      console.log(formData);
-      alert('Thank u!');
+  const onSubmit: SubmitHandler<TPaymentFailedForm> = async (data) => {
+    try {
+      const res = await sendFormData(data);
+      setMessage(res);
+      reset();
+    } catch (error) {
+      setMessage({
+        text: error.message,
+        success: false,
+      });
+    } finally {
+      setIsSubmitting(false);
+      setTimeout(() => {
+        router.push('/');
+        setMessage(null);
+      }, 1500);
     }
   };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
       <div>
         <div className="fixed inset-0 overflow-hidden opacity-75 bg-[#f8fafb]">
-          <Image alt="World Map" src={map} layout="fill" objectFit="cover" quality={100} />
+          <Image alt="World Map" src={Map} layout="fill" objectFit="cover" quality={100} />
         </div>
         <main className="relative flex flex-col items-center flex-1  sm:p-0 text-center z-10 w-full px-2">
           <h1 className="text-3xl sm:text-5xl font-bold">Payment failed</h1>
@@ -50,71 +63,110 @@ const ErrorPage = () => {
             <h5 className="text-sm  text-left mt-5">
               Describe to us why the payment might not go through
             </h5>
-            <form className="mt-5" onSubmit={handleSubmit}>
+            <form className="mt-5" onSubmit={handleSubmit(onSubmit)}>
               <div className="flex gap-5">
                 <div className="flex flex-col text-black flex-1">
-                  <label htmlFor="" className=" w-fit text-sm font-medium">
+                  <label htmlFor="firstName" className=" w-fit text-sm font-medium">
                     First Name
                   </label>
                   <input
-                    type="text"
+                    name="firstName"
                     className="h-10 w-full border-gray-200 border rounded-md mt-1 outline-none px-2"
-                    id="firstName"
-                    value={formData.firstName}
-                    onChange={handleChange}
-                    required
+                    {...register('firstName', {
+                      required: 'First Name is required',
+                      maxLength: 30,
+                    })}
                   />
+                  {errors.firstName?.message && (
+                    <p className="text-left text-[#F00] font-light text-xs">
+                      {errors.firstName.message}
+                    </p>
+                  )}
                 </div>
                 <div className="flex flex-col text-black flex-1">
-                  <label htmlFor="" className=" w-fit text-sm font-medium">
+                  <label htmlFor="secondName" className=" w-fit text-sm font-medium">
                     Second Name
                   </label>
                   <input
-                    type="text"
+                    name="secondName"
                     className="h-10 w-full border-gray-200 border rounded-md mt-1 outline-none px-2"
-                    id="secondName"
-                    value={formData.secondName}
-                    onChange={handleChange}
-                    required
+                    {...register('secondName', {
+                      required: 'Second Name is required',
+                      maxLength: 30,
+                    })}
                   />
+                  {errors.secondName?.message && (
+                    <p className="text-left text-[#F00] font-light text-xs">
+                      {errors.secondName.message}
+                    </p>
+                  )}
                 </div>
               </div>
               <div className="flex flex-col text-black mt-5">
-                <label htmlFor="" className=" w-fit text-sm font-medium">
+                <label htmlFor="moneyAmount" className=" w-fit text-sm font-medium">
                   Money amount
                 </label>
-                <input
-                  type="text"
-                  className="h-10 w-full border-gray-200 border rounded-md my-1 outline-none px-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  id="moneyAmount"
-                  value={formData.moneyAmount}
-                  onChange={handleChange}
-                  required
+                <Controller
+                  control={control}
+                  name="moneyAmount"
+                  rules={{
+                    required: 'Money amount is required',
+                  }}
+                  render={({ field }) => (
+                    <NumberInput
+                      {...field}
+                      classNames={{
+                        input:
+                          'h-10 w-full border-gray-200 border rounded-md my-1 outline-none px-2',
+                        section: 'h-0',
+                      }}
+                      clampBehavior="strict"
+                      allowNegative={false}
+                      max={10000}
+                      decimalScale={2}
+                      fixedDecimalScale
+                    />
+                  )}
                 />
-                {isMoneyAmountError && (
+                {errors.moneyAmount && (
                   <p className="text-left text-[#F00] font-light text-xs">
-                    Only numeric values are allowed
+                    {errors.moneyAmount.message}
                   </p>
                 )}
               </div>
               <div className="flex flex-col text-black mt-5">
-                <label htmlFor="" className=" w-fit text-sm font-medium">
+                <label htmlFor="message" className=" w-fit text-sm font-medium">
                   Message
                 </label>
                 <textarea
+                  name="message"
                   className="h-10 w-full border-gray-200 border rounded-md mt-1 outline-none px-2 min-h-[96px]"
-                  id="message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  required
+                  {...register('message', { required: 'Message is required', maxLength: 150 })}
                 />
+                {errors.message?.message && (
+                  <p className="text-left text-[#F00] font-light text-xs">
+                    {errors.message.message}
+                  </p>
+                )}
               </div>
               <div className="gap-4 flex flex-col justify-center items-center border-b mt-5">
                 <button
                   type="submit"
-                  className="py-4 px-6 text-lg w-full bg-black text-white rounded-md hover:bg-gray-900">
+                  className={`py-4 px-6 text-lg w-full bg-black text-white rounded-md hover:bg-gray-900 ${
+                    isSubmitting ? 'cursor-not-allowed' : ''
+                  }`}
+                  disabled={isSubmitting}>
                   Send feedback
                 </button>
+
+                {message && (
+                  <p
+                    className={`text-sm relative -top-2 ${
+                      message.success ? 'text-emerald-600' : 'text-red-600'
+                    }`}>
+                    {message.text}
+                  </p>
+                )}
               </div>
             </form>
           </section>

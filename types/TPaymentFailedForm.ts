@@ -1,6 +1,6 @@
-export type TFormData = {
+export type TPaymentFailedForm = {
   firstName: string;
   secondName: string;
-  moneyAmount: string;
+  moneyAmount: string | null;
   message: string;
 };

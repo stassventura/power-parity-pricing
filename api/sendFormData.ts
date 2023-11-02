@@ -1,6 +1,6 @@
-import { TFormData } from '../types/TFormData';
+import { TPaymentFailedForm } from '../types/TPaymentFailedForm';
 
-export const sendFormData = async (data: TFormData) => {
+export const sendFormData = async (data: TPaymentFailedForm) => {
   const response = await fetch('http://localhost:3000/api/formData', {
     method: 'POST',
     headers: {

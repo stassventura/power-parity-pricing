@@ -1,29 +1,34 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import Map from '../../public/map.svg';
-import { useForm, SubmitHandler } from 'react-hook-form';
-import { TFormData } from '../../types/TFormData';
+import { useForm, SubmitHandler, Controller } from 'react-hook-form';
+import { TPaymentFailedForm } from '../../types/TPaymentFailedForm';
 import { sendFormData } from '../../api/sendFormData';
+import { NumberInput } from '@mantine/core';
+import { useRouter } from 'next/navigation';
 
 const ErrorPage = () => {
   const [message, setMessage] = useState<{ text: string; success: boolean } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
 
   const {
     register,
     handleSubmit,
     formState: { errors },
+    control,
     reset,
-  } = useForm<TFormData>({
+  } = useForm<TPaymentFailedForm>({
     defaultValues: {
       firstName: '',
       secondName: '',
       moneyAmount: '',
       message: '',
     },
+    mode: 'onSubmit',
   });
 
-  const onSubmit: SubmitHandler<TFormData> = async (data) => {
+  const onSubmit: SubmitHandler<TPaymentFailedForm> = async (data) => {
     try {
       const res = await sendFormData(data);
       setMessage(res);
@@ -36,6 +41,7 @@ const ErrorPage = () => {
     } finally {
       setIsSubmitting(false);
       setTimeout(() => {
+        router.push('/');
         setMessage(null);
       }, 1500);
     }
@@ -100,17 +106,27 @@ const ErrorPage = () => {
                 <label htmlFor="moneyAmount" className=" w-fit text-sm font-medium">
                   Money amount
                 </label>
-                <input
+                <Controller
+                  control={control}
                   name="moneyAmount"
-                  className="h-10 w-full border-gray-200 border rounded-md my-1 outline-none px-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  {...register('moneyAmount', {
-                    required: 'This field is required',
-                    maxLength: 30,
-                    pattern: {
-                      value: /^[0-9]*$/,
-                      message: 'Only numeric values are allowed',
-                    },
-                  })}
+                  rules={{
+                    required: 'Money amount is required',
+                  }}
+                  render={({ field }) => (
+                    <NumberInput
+                      {...field}
+                      classNames={{
+                        input:
+                          'h-10 w-full border-gray-200 border rounded-md my-1 outline-none px-2',
+                        section: 'h-0',
+                      }}
+                      clampBehavior="strict"
+                      allowNegative={false}
+                      max={10000}
+                      decimalScale={2}
+                      fixedDecimalScale
+                    />
+                  )}
                 />
                 {errors.moneyAmount && (
                   <p className="text-left text-[#F00] font-light text-xs">

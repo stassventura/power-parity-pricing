@@ -12,16 +12,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       return res.status(400).json({ error: 'Invalid form data' });
     }
 
-    const dataToSave = {
-      ...req.body,
-      moneyAmount: parseFloat(req.body.moneyAmount),
-    };
-
-    if (isNaN(dataToSave.moneyAmount)) {
-      return res.status(400).json({ error: 'Invalid moneyAmount value' });
-    }
-
-    appendToFile(pathToFormData, dataToSave);
+    appendToFile(pathToFormData, req.body);
     return res.status(200).json({ message: 'Your message has been successfully sent!' });
   } else {
     return res.status(404).json({ error: 'Not Found' });
